@@ -1,1 +1,6 @@
 soshub-frontend/node_modules
+soshub-backend/test
+soshub-backend/venv
+soshub-backend/.idea
+.DS_Store
+.idea/
