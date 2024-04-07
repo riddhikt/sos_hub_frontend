@@ -34,12 +34,6 @@ function Form() {
         ...prevFormData,
         imageInfo: file, // Store the file object
       }));
-      // Extract metadata from the image
-      EXIF.getData(file, function () {
-        const allMetaData = EXIF.getAllTags(this);
-        setImageMetadata(allMetaData);
-        console.log(allMetaData);
-      });
     }
   };
 
