@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "soshub-backend/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "soshub-backend/main.py"
+    }
+  ]
+}
