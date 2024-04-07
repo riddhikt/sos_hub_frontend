@@ -6,7 +6,7 @@ function Form() {
   const [location, setLocation] = useState(null);
   const [formData, setFormData] = useState({
     imageInfo: null,
-    type: "",
+    category: "",
     description: "",
   });
   const [imageMetadata, setImageMetadata] = useState(null);
@@ -61,7 +61,7 @@ function Form() {
     navigator.geolocation.getCurrentPosition(async (position) => {
       // Construct the JSON payload
       const payload = {
-        type: formData.type,
+        category: formData.category,
         description: formData.description,
         location: {
           latitude: position.coords.latitude,
@@ -159,12 +159,12 @@ function Form() {
         {/* Dropdown */}
         <div className="mt-4 w-full">
           <label className="block text-sm font-medium leading-6 text-gray-900 text-left">
-            Type
+            Category
           </label>
           <div className="mt-2">
             <select
-              id="type"
-              name="type"
+              id="category"
+              name="category"
               autoComplete="country-name"
               className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               required
