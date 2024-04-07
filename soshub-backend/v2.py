@@ -8,6 +8,10 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 FIREWORKS_API_KEY = "zLvHIvRZLnEmAGCGYbCzSYx9sqHidDmOkYLBDwvB7MbdWFCl"
+NEURELO_API_URL = "https://us-west-2.aws.neurelo.com/rest/user_requests"
+NEURELO_API_KEY = ("neurelo_9wKFBp874Z5xFw6ZCfvhXTGX5vYS/bbD99o3iuuYi5OaN1YNcm8X/wP6BK5rCoxsnuCzU"
+                   "+DSWWnA2HTr1SbRNSDU6O2Dzyby/QShv4i2z203kMppHx6i5B5WkVdFZDhZ3Lkdy7CgzY/RCLRSCNhqqrskqwlvRPQupV2lkO"
+                   "+aMaBVVTJtYZt13rQBC12HmnsA_WFbrbBk4B0Y6h9Lffmt6sagkxoD+xVnn4D5UJBX7t6Q=")
 
 
 def encode_image(image_path):
@@ -173,12 +177,28 @@ def analyze_emergency(image_base64, prompt):
         return "Error processing image."
 
 
+def store_analysis_results_in_db(data):
+    headers = {
+        "X-API-KEY": NEURELO_API_KEY,
+        "Content-Type": "application/json"
+    }
+    response = requests.post(NEURELO_API_URL, headers=headers, json=data)
+    if response.status_code == 200:
+        print("Data successfully stored in Neurelo database.")
+    else:
+        print(
+            f"Failed to store data in Neurelo database. Status code: {response.status_code}, Response: {response.text}")
+
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
     image_base64 = data.get('image_base64')
+    if not image_base64:
+        return jsonify({"error": "image_base64 is required"}), 400
     user_category = data.get('category', '')
     user_description = data.get('description', '')
+    location = data.get('location', '')
 
     prompt = ("Prompt- You are a First Responder Analyst and your job is to view the image and "
               "analyze what kind of incident has happened. Also classify which of the first "
@@ -200,11 +220,20 @@ def analyze():
 
     recommendations = analyze_recommendations(firellava_analysis, llama_analysis)
 
-    return jsonify({
-        "FireLLaVA Analysis": firellava_analysis,
-        "Llama Analysis": json.loads(llama_analysis),
-        "Recommendation Analysis": json.loads(recommendations)
-    })
+    data_to_store = [{
+        "image_analysis": firellava_analysis,
+        "llama_analysis": json.loads(llama_analysis) if llama_analysis else None,
+        "recommendations": json.loads(recommendations) if recommendations else None,
+        "location": location,
+        "image_base64": image_base64,
+        "category": user_category,
+        "desc": user_description
+    }]
+
+    # Call the function to store data in the Neurelo database
+    store_analysis_results_in_db(data_to_store)
+
+    return jsonify(data_to_store)
 
 
 if __name__ == '__main__':
