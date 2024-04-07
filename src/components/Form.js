@@ -4,11 +4,12 @@ import EXIF from "exif-js";
 import Overlay from "./Overlay";
 
 function Form() {
-  const [formData, setFormData] = useState({
+  const initialState = {
     imageInfo: null,
     category: "",
     description: "",
-  });
+  };
+  const [formData, setFormData] = useState(initialState);
   const [imageMetadata, setImageMetadata] = useState(null);
   const [imagePreview, setImagePreview] = useState(null); // For storing the preview URL
   const [isLoading, setIsLoading] = useState(false);
@@ -112,12 +113,11 @@ function Form() {
     );
   };
 
-  // const handleReset = () => {
-  //   console.log("calling reset")
-  //   setFormData(initialState);
-  //   setImagePreview(null);
-  //   fileInputRef.current.value = ""; // Reset file input
-  // };
+  const handleReset = () => {
+    console.log("calling reset")
+    setFormData(initialState);
+    setImagePreview(null)
+  };
 
   return (
     <div className="mx-auto max-w-4xl p-8">
@@ -187,8 +187,8 @@ function Form() {
               name="category"
               autoComplete="country-name"
               className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              required
               onChange={handleChange}
+              value={formData.category}
             >
               <option></option>
               <option>Injury</option>
@@ -212,8 +212,8 @@ function Form() {
               name="description"
               rows={3}
               className="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              required
               onChange={handleChange}
+              value={formData.description}
             />
           </div>
         </div>
@@ -223,6 +223,7 @@ function Form() {
           <button
             type="button"
             className="text-sm font-semibold leading-6 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 w-full transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            onClick={handleReset}
           >
             Reset
           </button>
