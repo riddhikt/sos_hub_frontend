@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import EXIF from "exif-js";
+import Overlay from "./Overlay";
 
 function Form() {
-  const [location, setLocation] = useState(null);
   const [formData, setFormData] = useState({
     imageInfo: null,
     category: "",
@@ -11,6 +11,10 @@ function Form() {
   });
   const [imageMetadata, setImageMetadata] = useState(null);
   const [imagePreview, setImagePreview] = useState(null); // For storing the preview URL
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
+  const [responseData, setResponseData] = useState({});
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -41,63 +45,76 @@ function Form() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+    setIsOverlayOpen(true); // Open the overlay when form submission starts
+    setOverlayLoading(true);
+
     // Check if geolocation is available
     if (!navigator.geolocation) {
       console.error("Geolocation is not supported by this browser.");
+      setIsLoading(false);
       return;
     }
-  
-    const convertToBase64 = (file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  
-    // Attempt to convert image to Base64 (if exists)
-    const imageBase64 = formData.imageInfo ? await convertToBase64(formData.imageInfo) : null;
-  
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      // Construct the JSON payload
-      const payload = {
-        category: formData.category,
-        description: formData.description,
-        location: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        },
-        image: imageBase64,
-      };
 
-      console.log(payload)
-  
-      // Send the JSON payload to your backend
-    //   try {
-    //     const response = await fetch('YOUR_BACKEND_ENDPOINT', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify(payload),
-    //     });
-  
-    //     if (!response.ok) {
-    //       throw new Error('Network response was not ok');
-    //     }
-  
-    //     const responseData = await response.json();
-    //     console.log('Successfully submitted:', responseData);
-  
-    //     // Update the state or UI as necessary
-    //   } catch (error) {
-    //     console.error('Failed to submit form:', error);
-    //   }
-    }, (error) => {
-      console.error("Error Code = " + error.code + " - " + error.message);
-    });
+    const convertToBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+
+    // Attempt to convert image to Base64 (if exists)
+    const imageBase64 = formData.imageInfo
+      ? await convertToBase64(formData.imageInfo)
+      : null;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        // Construct the JSON payload
+        const payload = {
+          category: formData.category,
+          description: formData.description,
+          location: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+          image_base64: imageBase64,
+        };
+
+        console.log(payload);
+
+        // Send the JSON payload to your backend
+        try {
+          const response = await fetch("https://soshub-43a0b726d57f.herokuapp.com/analyze", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const responseData = await response.json();
+          console.log("Successfully submitted:", responseData);
+          setResponseData(responseData);
+
+          // Update the state or UI as necessary
+        } catch (error) {
+          console.error("Failed to submit form:", error);
+          setResponseData({ message: "Submission failed. Please try again later." });
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      (error) => {
+        console.error("Error Code = " + error.code + " - " + error.message);
+        setIsLoading(false);
+      }
+    );
   };
-  
 
   return (
     <div className="mx-auto max-w-4xl p-8">
@@ -215,11 +232,18 @@ function Form() {
       </form>
 
       {/* Displaying the location */}
-      {location && (
+      {/* {location && (
         <p className="text-xs leading-5 text-gray-600">
           Latitude: {location.latitude}, Longitude: {location.longitude}
         </p>
-      )}
+      )} */}
+      
+      <Overlay 
+        open={isOverlayOpen}
+        setOpen={setIsOverlayOpen}
+        isLoading={isLoading}
+        responseData={responseData}
+      />
 
       <p className="mt-10 text-xs font-medium leading-6 text-gray-500">
         Made with ❤️ for SF
