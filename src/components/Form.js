@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import EXIF from "exif-js";
 import Overlay from "./Overlay";
@@ -15,6 +15,8 @@ function Form() {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [responseData, setResponseData] = useState({});
+
+  const fileInputRef = useRef(null); // Add this line
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -110,6 +112,13 @@ function Form() {
     );
   };
 
+  // const handleReset = () => {
+  //   console.log("calling reset")
+  //   setFormData(initialState);
+  //   setImagePreview(null);
+  //   fileInputRef.current.value = ""; // Reset file input
+  // };
+
   return (
     <div className="mx-auto max-w-4xl p-8">
       <form onSubmit={handleSubmit}>
@@ -181,6 +190,7 @@ function Form() {
               required
               onChange={handleChange}
             >
+              <option></option>
               <option>Injury</option>
               <option>Accident</option>
               <option>Medical Emergency</option>
