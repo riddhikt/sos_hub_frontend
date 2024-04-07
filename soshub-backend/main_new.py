@@ -5,6 +5,7 @@ from io import BytesIO
 import os
 from datetime import datetime
 import requests
+import json
 
 app = Flask(__name__)
 
@@ -121,7 +122,7 @@ def analyze_data_with_llama(firellava_analysis):
                 'status_code': llama_response.status_code}
 
 
-def analyze_user_data_with_llama(firellava_analysis, user_category, user_description):
+def analyze_user_data_with_llama(firellava_analysis, category, description):
     prompt = (f"<s>[INST] <<SYS>>Your task is to review the following information and provide a response in JSON "
               f"format:- AI Analysis: A text analysis of an emergency image by an AI model, identifying the type of "
               f"emergency, recommended first responders, and severity.- User Category: An optional category entered "
@@ -136,8 +137,8 @@ def analyze_user_data_with_llama(firellava_analysis, user_category, user_descrip
               f"analysis. Example JSON output-'severity': 'high','responders': ['firefighters', 'paramedics'],"
               f"'emergency': 'House fire with potential casualties','confidence': 85. Make sure that you ONLY return "
               f"the data in JSON format and NO explanation or extra text or header is needed.<</SYS>>Input:AI "
-              f"Analysis: {firellava_analysis} , User Category: {user_category}, User Description: "
-              f"{user_description}[/INST]"
+              f"Analysis: {firellava_analysis} , User Category: {category}, User Description: "
+              f"{description}[/INST]"
               )
 
     llama_payload = {
@@ -212,8 +213,8 @@ def analyze_recommendations(firellava_analysis):
 def analyze():
     data = request.json
     base64_str = data['base64_str']
-    user_category = data.get('user_category', '')
-    user_description = data.get('user_description', '')
+    category = data.get('category', '')
+    description = data.get('description', '')
 
     # Generate a unique filename for the image
     filename = datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '.png'
@@ -228,8 +229,8 @@ def analyze():
     firellava_analysis = analyze_emergency(image_url)
 
     # Assuming firellava_analysis needs to be passed as is. Adjust if needed.
-    if user_category and user_description:
-        llama_analysis = analyze_user_data_with_llama(firellava_analysis, user_category, user_description)
+    if category and description:
+        llama_analysis = analyze_user_data_with_llama(firellava_analysis, category, description)
     else:
         llama_analysis = analyze_data_with_llama(firellava_analysis)
     recommendations = analyze_recommendations(firellava_analysis)
@@ -258,7 +259,7 @@ def analyze():
 
     return jsonify({
         "FireLLaVA Analysis": firellava_analysis,
-        "Llama Analysis": llama_analysis['choices'][0]['text'],
+        "Llama Analysis": json.loads(llama_analysis['choices'][0]['text']),
         "recommendations": separated_lists
     })
 
