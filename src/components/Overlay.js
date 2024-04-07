@@ -1,9 +1,10 @@
 // Overlay.js
-import React, { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import React, { Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 
 const Overlay = ({ open, setOpen, isLoading, responseData }) => {
-  const emergencyAnalysis = responseData?.[0]?.llama_analysis?.emergency || 'Loading analysis...';
+  const emergencyAnalysis =
+    responseData?.[0]?.llama_analysis?.emergency || "Loading analysis...";
   const dos = responseData?.[0]?.recommendations?.dos || [];
   const donts = responseData?.[0]?.recommendations?.donts || [];
 
@@ -24,35 +25,50 @@ const Overlay = ({ open, setOpen, isLoading, responseData }) => {
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  {!isLoading ? (
-                    <>
-                      <div className="text-lg leading-6 font-medium text-gray-900">Emergency Request Sent!</div>
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-500">{emergencyAnalysis}</p>
-                      </div>
-                      <div className="mt-4">
-                        <h4 className="font-semibold">Dos:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {dos.map((item, index) => (
-                            <li key={index} className="text-sm text-gray-500">{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="mt-4">
-                        <h4 className="font-semibold">Donts:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {donts.map((item, index) => (
-                            <li key={index} className="text-sm text-gray-500">{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </>
-                  ) : (
+                  {isLoading ? (
                     <div className="flex justify-center items-center p-12">
-                      <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+                      <div
+                        className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
+                  ) : (
+                    <>
+                      <div className="text-lg leading-6 font-medium text-gray-900">
+                        Emergency Request Sent!
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">
+                          {emergencyAnalysis}
+                        </p>
+                      </div>
+                      {dos.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="font-semibold">Dos:</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {dos.map((item, index) => (
+                              <li key={index} className="text-sm text-gray-500">
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {donts.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="font-semibold">Donts:</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {donts.map((item, index) => (
+                              <li key={index} className="text-sm text-gray-500">
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
