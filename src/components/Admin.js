@@ -7,7 +7,7 @@ function Admin() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true); // Start loading
+      setIsLoading(true); // Start loading indicator
       try {
         const response = await fetch(
           "https://soshub-43a0b726d57f.herokuapp.com/get_db"
@@ -18,7 +18,7 @@ function Admin() {
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false); // End loading
+        setIsLoading(false); // End loading indicator
       }
     };
 
